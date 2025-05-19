@@ -1,26 +1,10 @@
 import { auth } from "@/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-async function getActiveEmployeeCount() {
-  try {
-    const result = await prisma.$queryRaw<[{ count: number }]>`
-      SELECT COUNT(*) as count
-      FROM Employee
-      WHERE status = 'Active'
-    `;
-    return result[0].count;
-  } catch (error) {
-    console.error('Error fetching active employee count:', error);
-    return 0;
-  }
-}
+import { EmployeeService } from "@/services/employee.service";
 
 export default async function DashboardPage() {
   const session = await auth();
-  const activeEmployeeCount = await getActiveEmployeeCount();
+  const activeEmployeeCount = await EmployeeService.getActiveEmployeeCount();
 
   return (
     <div className="container p-6">
