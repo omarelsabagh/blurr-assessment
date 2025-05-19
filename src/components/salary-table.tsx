@@ -48,21 +48,13 @@ export default function SalaryTable({ employees }: SalaryTableProps) {
   }, [selectedMonth]);
 
   const fetchSalaryRecords = async () => {
-    setLoading(true);
-    setError('');
     try {
       const [year, month] = selectedMonth.split('-');
-      console.log('Fetching salary records for:', { year, month });
-      const res = await fetch(`/api/salaries?year=${year}&month=${month}`);
-      if (!res.ok) throw new Error('Failed to fetch salary records');
-      const data = await res.json();
-      console.log('Fetched salary records:', data);
-      setSalaryRecords(data);
-    } catch (err) {
-      console.error('Error fetching salary records:', err);
-      setError('Could not load salary records');
-    } finally {
-      setLoading(false);
+      const data = await fetch(`/api/salary-records?year=${year}&month=${month}`);
+      const records = await data.json();
+      setSalaryRecords(records);
+    } catch (error) {
+      console.error('Error fetching salary records:', error);
     }
   };
 
@@ -115,13 +107,6 @@ export default function SalaryTable({ employees }: SalaryTableProps) {
     setSavingStates(prev => ({ ...prev, [employeeId]: true }));
     try {
       const [year, month] = selectedMonth.split('-');
-      console.log('Saving salary record:', { 
-        employeeId, 
-        bonus: record.bonus,
-        deductible: record.deductible,
-        year, 
-        month 
-      });
 
       const res = await fetch('/api/salaries', {
         method: 'PUT',
@@ -141,7 +126,6 @@ export default function SalaryTable({ employees }: SalaryTableProps) {
         throw new Error('Failed to save salary record');
       }
       
-      console.log('Successfully saved salary record');
       setEditingStates(prev => ({ ...prev, [employeeId]: false }));
       setTempValues(prev => {
         const newState = { ...prev };
