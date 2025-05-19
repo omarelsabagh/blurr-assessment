@@ -7,7 +7,7 @@ async function generateEmployeeId() {
   // Get the latest employee ID using a raw query
   const result = await prisma.$queryRaw<{ employee_id: string }[]>`
     SELECT employee_id 
-    FROM employees 
+    FROM Employee 
     ORDER BY employee_id DESC 
     LIMIT 1
   `;
@@ -38,7 +38,7 @@ export async function GET() {
         basic_salary as "basic_salary",
         created_at as "created_at",
         updated_at as "updated_at"
-      FROM employees 
+      FROM Employee 
       ORDER BY created_at DESC
     `;
     return NextResponse.json(employees);
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     try {
       // Use a raw query to insert the employee
       await prisma.$executeRaw`
-        INSERT INTO employees (
+        INSERT INTO Employee (
           id, employee_id, name, position, department, status, 
           joining_date, basic_salary, created_at, updated_at
         ) VALUES (
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
 
       // Fetch the created employee
       const employee = await prisma.$queryRaw<Employee[]>`
-        SELECT * FROM employees WHERE employee_id = ${employeeId}
+        SELECT * FROM Employee WHERE employee_id = ${employeeId}
       `;
 
       if (!employee || employee.length === 0) {

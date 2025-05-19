@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import EmployeeForm, { Employee } from '@/components/employee-form';
 import ConfirmationModal from '@/components/confirmation-modal';
+import SalaryTable from '@/components/salary-table';
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -145,7 +146,13 @@ export default function EmployeesPage() {
           )}
         </CardContent>
       </Card>
-      {/* Modal */}
+
+      {/* Salary Table */}
+      {!loading && !error && employees.length > 0 && (
+        <SalaryTable employees={employees} />
+      )}
+
+      {/* Employee Form Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 backdrop-blur-[2px]">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">

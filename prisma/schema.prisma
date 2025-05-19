@@ -59,16 +59,31 @@ model VerificationToken {
 }
 
 model Employee {
-  id           String   @id @default(cuid())
-  employeeId   String   @unique @map("employee_id")
-  name         String
-  position     String
-  department   String
-  status       String   @default("Active")
-  joiningDate  DateTime @map("joining_date")
-  basicSalary  Float    @map("basic_salary")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(uuid())
+  employee_id   String    @unique
+  name          String
+  position      String
+  department    String
+  status        String
+  joining_date  DateTime
+  basic_salary  Float
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  salaries      Salary[]
+}
 
-  @@map("employees")
+model Salary {
+  id            String    @id @default(uuid())
+  employee_id   String
+  year          Int
+  month         Int
+  bonus         Float     @default(0)
+  deductible    Float     @default(0)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  employee      Employee  @relation(fields: [employee_id], references: [employee_id])
+
+  @@unique([employee_id, year, month])
+  @@index([employee_id])
+  @@index([year, month])
 }

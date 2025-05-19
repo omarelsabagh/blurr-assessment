@@ -3,85 +3,64 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clear existing data
-  await prisma.employee.deleteMany();
+  // Insert employees using raw SQL
+  await prisma.$executeRaw`
+    INSERT INTO Employee (
+      employee_id,
+      name,
+      position,
+      department,
+      status,
+      joining_date,
+      basic_salary,
+      created_at,
+      updated_at
+    ) VALUES
+      ('EMP1001', 'Alice Johnson', 'Software Engineer', 'Engineering', 'Active', '2022-01-15', 85000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+      ('EMP1002', 'Bob Smith', 'Product Manager', 'Product', 'Active', '2021-09-01', 95000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+      ('EMP1003', 'Carol Lee', 'HR Specialist', 'Human Resources', 'On Leave', '2020-06-10', 60000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+      ('EMP1004', 'David Kim', 'Designer', 'Design', 'Inactive', '2019-03-20', 70000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+      ('EMP1005', 'Emma Wilson', 'Marketing Manager', 'Marketing', 'Active', '2023-01-05', 105000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+      ('EMP1006', 'Frank Chen', 'DevOps Engineer', 'Engineering', 'Active', '2022-08-15', 115000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+      ('EMP1007', 'Grace Martinez', 'Sales Representative', 'Sales', 'Inactive', '2021-11-30', 65000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+      ('EMP1008', 'Henry Taylor', 'Data Analyst', 'Data Science', 'Active', '2023-03-01', 85000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `;
 
-  await prisma.employee.createMany({
-    data: [
-      {
-        employeeId: 'EMP1001',
-        name: 'Alice Johnson',
-        position: 'Senior Software Engineer',
-        department: 'Engineering',
-        status: 'Active',
-        joiningDate: new Date('2022-01-15'),
-        basicSalary: 120000,
-      },
-      {
-        employeeId: 'EMP1002',
-        name: 'Bob Smith',
-        position: 'Product Manager',
-        department: 'Product',
-        status: 'Active',
-        joiningDate: new Date('2021-09-01'),
-        basicSalary: 110000,
-      },
-      {
-        employeeId: 'EMP1003',
-        name: 'Carol Lee',
-        position: 'HR Specialist',
-        department: 'Human Resources',
-        status: 'On Leave',
-        joiningDate: new Date('2020-06-10'),
-        basicSalary: 75000,
-      },
-      {
-        employeeId: 'EMP1004',
-        name: 'David Kim',
-        position: 'UX Designer',
-        department: 'Design',
-        status: 'Active',
-        joiningDate: new Date('2019-03-20'),
-        basicSalary: 95000,
-      },
-      {
-        employeeId: 'EMP1005',
-        name: 'Emma Wilson',
-        position: 'Marketing Manager',
-        department: 'Marketing',
-        status: 'Active',
-        joiningDate: new Date('2023-01-05'),
-        basicSalary: 105000,
-      },
-      {
-        employeeId: 'EMP1006',
-        name: 'Frank Chen',
-        position: 'DevOps Engineer',
-        department: 'Engineering',
-        status: 'Active',
-        joiningDate: new Date('2022-08-15'),
-        basicSalary: 115000,
-      },
-      {
-        employeeId: 'EMP1007',
-        name: 'Grace Martinez',
-        position: 'Sales Representative',
-        department: 'Sales',
-        status: 'Inactive',
-        joiningDate: new Date('2021-11-30'),
-        basicSalary: 65000,
-      },
-      {
-        employeeId: 'EMP1008',
-        name: 'Henry Taylor',
-        position: 'Data Analyst',
-        department: 'Data Science',
-        status: 'Active',
-        joiningDate: new Date('2023-03-01'),
-        basicSalary: 85000,
-      }
-    ],
-  });
+  // Create some initial salary records for the current month
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+
+  // Get all employees
+  const employees = await prisma.$queryRaw`
+    SELECT employee_id FROM Employee
+  `;
+
+  // Insert salary records for each employee
+  for (const employee of employees as { employee_id: string }[]) {
+    const bonus = Math.floor(Math.random() * 5000); // Random bonus between 0 and 5000
+    const deductible = Math.floor(Math.random() * 2000); // Random deductible between 0 and 2000
+
+    await prisma.$executeRaw`
+      INSERT INTO Salary (
+        employee_id,
+        year,
+        month,
+        bonus,
+        deductible,
+        created_at,
+        updated_at
+      ) VALUES (
+        ${employee.employee_id},
+        ${year},
+        ${month},
+        ${bonus},
+        ${deductible},
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `;
+  }
 }
 
 main()
