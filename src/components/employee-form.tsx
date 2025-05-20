@@ -167,6 +167,7 @@ export default function EmployeeForm({ employee, onSuccess }: EmployeeFormProps)
       <Button
         type="submit"
         disabled={loading}
+        className="cursor-pointer"
       >
         {loading ? 'Saving...' : employee ? 'Update Employee' : 'Add Employee'}
       </Button>

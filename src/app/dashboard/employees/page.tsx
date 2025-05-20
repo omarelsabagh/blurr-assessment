@@ -85,7 +85,7 @@ export default function EmployeesPage() {
     <div className="container p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Employees</h1>
-        <Button onClick={handleAdd}>
+        <Button onClick={handleAdd} className="cursor-pointer">
           Add Employee
         </Button>
       </div>
@@ -126,14 +126,14 @@ export default function EmployeesPage() {
                     <TableCell>
                       <Button
                         variant="ghost"
-                        className="text-blue-600 hover:text-blue-700 mr-2"
+                        className="text-blue-600 hover:text-blue-700 mr-2 cursor-pointer"
                         onClick={() => handleEdit(employee)}
                       >
                         Edit
                       </Button>
                       <Button
                         variant="ghost"
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 cursor-pointer"
                         onClick={() => handleDeleteClick(employee)}
                       >
                         Delete

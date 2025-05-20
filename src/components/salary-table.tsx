@@ -50,11 +50,17 @@ export default function SalaryTable({ employees }: SalaryTableProps) {
   const fetchSalaryRecords = async () => {
     try {
       const [year, month] = selectedMonth.split('-');
-      const data = await fetch(`/api/salary-records?year=${year}&month=${month}`);
+      const data = await fetch(`/api/salaries?year=${year}&month=${month}`);
+      if (!data.ok) {
+        throw new Error('Failed to fetch salary records');
+      }
       const records = await data.json();
       setSalaryRecords(records);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching salary records:', error);
+      setError('Failed to load salary records');
+      setLoading(false);
     }
   };
 
@@ -93,9 +99,11 @@ export default function SalaryTable({ employees }: SalaryTableProps) {
   };
 
   const handleInputChange = (employeeId: string, field: 'bonus' | 'deductible', value: number) => {
+    // Ensure value is a valid number, default to 0 if NaN
+    const safeValue = isNaN(value) ? 0 : value;
     setSalaryRecords(prev => prev.map(record => 
       record.employee_id === employeeId
-        ? { ...record, [field]: value }
+        ? { ...record, [field]: safeValue }
         : record
     ));
   };
@@ -164,7 +172,10 @@ export default function SalaryTable({ employees }: SalaryTableProps) {
   }, [employees, salaryRecords, selectedMonth]);
 
   const calculateTotal = (record: SalaryRecord) => {
-    return record.basic_salary + record.bonus - record.deductible;
+    const basic = isNaN(record.basic_salary) ? 0 : record.basic_salary;
+    const bonus = isNaN(record.bonus) ? 0 : record.bonus;
+    const deductible = isNaN(record.deductible) ? 0 : record.deductible;
+    return basic + bonus - deductible;
   };
 
   return (
@@ -179,12 +190,12 @@ export default function SalaryTable({ employees }: SalaryTableProps) {
             value={selectedMonth}
             onValueChange={setSelectedMonth}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] cursor-pointer">
               <SelectValue placeholder="Select month" />
             </SelectTrigger>
             <SelectContent>
               {months.map(month => (
-                <SelectItem key={month} value={month}>
+                <SelectItem key={month} value={month} className="cursor-pointer">
                   {format(new Date(month + '-01'), 'MMMM yyyy')}
                 </SelectItem>
               ))}
@@ -246,39 +257,32 @@ export default function SalaryTable({ employees }: SalaryTableProps) {
                       {isEditing ? (
                         <div className="flex gap-2">
                           <Button
-                            onClick={() => handleSave(record.employee_id)}
-                            disabled={isSaving}
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-1"
-                          >
-                            {isSaving ? (
-                              'Saving...'
-                            ) : (
-                              <>
-                                <Save className="h-4 w-4" />
-                                Save
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            onClick={() => handleCancel(record.employee_id)}
-                            disabled={isSaving}
                             variant="ghost"
                             size="sm"
+                            onClick={() => handleSave(record.employee_id)}
+                            disabled={isSaving}
+                            className="cursor-pointer"
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCancel(record.employee_id)}
+                            disabled={isSaving}
+                            className="cursor-pointer"
                           >
                             Cancel
                           </Button>
                         </div>
                       ) : (
                         <Button
-                          onClick={() => handleEdit(record.employee_id)}
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          className="flex items-center gap-1"
+                          onClick={() => handleEdit(record.employee_id)}
+                          className="cursor-pointer"
                         >
                           <Pencil className="h-4 w-4" />
-                          Edit
                         </Button>
                       )}
                     </TableCell>

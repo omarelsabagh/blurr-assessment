@@ -70,6 +70,7 @@ model Employee {
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
   salaries      Salary[]
+  tasks         Task[]
 }
 
 model Salary {
@@ -86,4 +87,31 @@ model Salary {
   @@unique([employee_id, year, month])
   @@index([employee_id])
   @@index([year, month])
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      String    @default("active") // active, completed, archived
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  tasks       Task[]
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  priority    String    @default("medium") // low, medium, high
+  status      String    @default("todo") // todo, in_progress, completed
+  project_id  String
+  project     Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  assigned_to String?
+  employee    Employee? @relation(fields: [assigned_to], references: [employee_id])
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  @@index([project_id])
+  @@index([assigned_to])
 }
