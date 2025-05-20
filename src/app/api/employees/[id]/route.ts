@@ -43,27 +43,22 @@ export async function PUT(
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Use raw query to update the employee
-    await prisma.$executeRaw`
-      UPDATE employees 
-      SET 
-        employee_id = ${employee_id},
-        name = ${name},
-        position = ${position},
-        department = ${department},
-        status = ${status},
-        joining_date = ${new Date(joining_date)},
-        basic_salary = ${basic_salary},
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${params.id}
-    `;
+    // Use Prisma's update method instead of raw SQL
+    const employee = await prisma.employee.update({
+      where: { id: params.id },
+      data: {
+        employee_id,
+        name,
+        position,
+        department,
+        status,
+        joining_date: new Date(joining_date),
+        basic_salary,
+        updated_at: new Date()
+      }
+    });
 
-    // Fetch the updated employee
-    const employee = await prisma.$queryRaw<Employee[]>`
-      SELECT * FROM employees WHERE id = ${params.id}
-    `;
-
-    return NextResponse.json(employee[0]);
+    return NextResponse.json(employee);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return NextResponse.json({ error: 'Employee ID already exists' }, { status: 400 });

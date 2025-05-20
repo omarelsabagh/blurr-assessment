@@ -5,13 +5,13 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const result = await prisma.$queryRaw<[{ count: number }]>`
-      SELECT COUNT(*) as count
-      FROM Employee
-      WHERE status = 'Active'
-    `;
+    const count = await prisma.employee.count({
+      where: {
+        status: 'Active'
+      }
+    });
     
-    return NextResponse.json({ count: result[0].count });
+    return NextResponse.json({ count });
   } catch (error) {
     console.error('Error fetching active employee count:', error);
     return NextResponse.json({ error: 'Failed to fetch active employee count' }, { status: 500 });
